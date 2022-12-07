@@ -17,21 +17,47 @@ import puppeteer from "puppeteer";
 
   // selector of all products
   const productsHandles = await page.$$(
-    ".s-main-slot.s-result-list.s-search-results.sg-row"
+    ".s-main-slot.s-result-list.s-search-results.sg-row > .s-result-item"
   );
+
+  let i = 0;
+  let items = [];
 
   // loop thru all handle
   for (const productHandle of productsHandles) {
-    
-    // getting product title from span
-    const title = await page.evaluate(
-      (el) => el.querySelector("h2 > a > span").textContent,
-      productHandle
-    );
+    let title = "Null";
+    let price = "Null";
+    let image = "Null";
 
-    // do something
-    console.log(title);
+    try {
+      // getting product title from span
+      title = await page.evaluate(
+        (el) => el.querySelector("h2 > a > span").textContent,
+        productHandle
+      );
+    } catch (error) {}
+    try {
+      // getting price from span
+      price = await page.evaluate(
+        (el) => el.querySelector(".a-price > .a-offscreen ").textContent,
+        productHandle
+      );
+    } catch (error) {}
+    try {
+      // getting image from span
+      image = await page.evaluate(
+        (el) => el.querySelector(".s-image").getAttribute("src"),
+        productHandle
+      );
+    } catch (error) {}
+
+    if (title !== "Null") {
+      // creating an array with all information
+      items.push({ title, price, image });
+    }
   }
+
+  console.log(items);
 
   // await browser.close();
 })();
